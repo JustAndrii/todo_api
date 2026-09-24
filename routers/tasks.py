@@ -6,7 +6,7 @@ from auth import get_current_user
 from schemas import TaskCreate,TaskResponse,TaskUpdate
 
 
-router = APIRouter() #router = пачка маршрутів, яку ми потім підключаємо до app.
+router = APIRouter() 
 
 
 @router.post('/tasks', response_model=TaskResponse,status_code = 201)
