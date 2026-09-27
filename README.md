@@ -1,3 +1,4 @@
+![Todo API Banner](images/banner.png)
 # Todo API
 
 A RESTful backend application built with FastAPI and PostgreSQL.
@@ -35,6 +36,7 @@ The application allows users to register, authenticate using JWT tokens, and man
 
 todo_api/
 ├── images/
+│   ├── banner.png
 │   └── swagger.png
 ├── routers/
 │   ├── users.py
