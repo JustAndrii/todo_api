@@ -29,9 +29,9 @@ def register(user: UserCreate, db = Depends(get_db)):
 def identify_person(login: OAuth2PasswordRequestForm = Depends(), db=Depends(get_db)):
     find_user = db.query(User).filter(User.email == login.username).first()
     if find_user is None:
-        raise HTTPException(status_code=400, detail="Email doesn't exist")
+        raise HTTPException(status_code=401, detail="Incorrect email or password", headers={"WWW-Authenticate": "Bearer"})
     if verify_password(login.password, find_user.hashed_password) is False:
-        raise HTTPException(status_code=400, detail="Incorrect password")
+        raise HTTPException(status_code=401, detail="Incorrect email or password",headers={"WWW-Authenticate": "Bearer"})
 
     access_token = create_access_token({ 'user_id': find_user.id})
 
