@@ -20,9 +20,16 @@ def create_task(task:TaskCreate,db=Depends(get_db),current_user = Depends(get_cu
 
 
 @router.get('/tasks', response_model=list[TaskResponse])
-def get_user_tasks(current_user = Depends(get_current_user),db=Depends(get_db)):
-    tasks = db.query(Task).filter(Task.user_id == current_user.id).all()
+def get_user_tasks(current_user = Depends(get_current_user),db=Depends(get_db),completed:bool | None=None):
 
+    if completed is  None:
+     tasks = db.query(Task).filter(Task.user_id == current_user.id).all()
+
+    elif completed:
+     tasks = db.query(Task).filter(Task.user_id == current_user.id,Task.completed == True).all()
+
+    else:
+     tasks = db.query(Task).filter(Task.user_id == current_user.id,Task.completed == False).all()
 
     return tasks
 
