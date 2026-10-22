@@ -1,3 +1,5 @@
+from itertools import takewhile
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from database import get_db
@@ -12,6 +14,10 @@ router = APIRouter()
 @router.post('/tasks', response_model=TaskResponse,status_code = 201)
 def create_task(task:TaskCreate,db=Depends(get_db),current_user = Depends(get_current_user)):
     new_task = Task(title = task.title,completed = task.completed,user_id = current_user.id)
+
+    if not new_task.title.strip():
+        raise HTTPException(status_code=400, detail="Task title cannot be empty")
+
     db.add(new_task)
     db.commit()
     db.refresh(new_task)
@@ -47,13 +53,6 @@ def get_user_tasks_by_id(task_id:int,current_user = Depends(get_current_user),db
 
     return task
 
-
-
-
-
-
-
-    return tasks
 
 @router.patch('/tasks/{task_id}', response_model=TaskResponse)
 def update_task(task_id:int,task:TaskUpdate,db=Depends(get_db),current_user = Depends(get_current_user)):
