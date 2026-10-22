@@ -20,16 +20,38 @@ def create_task(task:TaskCreate,db=Depends(get_db),current_user = Depends(get_cu
 
 
 @router.get('/tasks', response_model=list[TaskResponse])
-def get_user_tasks(current_user = Depends(get_current_user),db=Depends(get_db),completed:bool | None=None):
+def get_user_tasks(current_user = Depends(get_current_user),db=Depends(get_db),completed:bool | None=None, search: str | None= None):
 
-    if completed is  None:
-     tasks = db.query(Task).filter(Task.user_id == current_user.id).all()
+    query = db.query(Task).filter(Task.user_id == current_user.id)
 
-    elif completed:
-     tasks = db.query(Task).filter(Task.user_id == current_user.id,Task.completed == True).all()
+    if search is not None:
+        query = query.filter(Task.title.ilike(f'%{search}%'))
 
-    else:
-     tasks = db.query(Task).filter(Task.user_id == current_user.id,Task.completed == False).all()
+    if completed is not None:
+        if completed:
+         query = query.filter(Task.completed == True)
+        else:
+         query = query.filter(Task.completed == False)
+
+    tasks = query.all()
+
+
+    return tasks
+
+@router.get('/tasks/{task_id}', response_model=TaskResponse)
+def get_user_tasks_by_id(task_id:int,current_user = Depends(get_current_user),db=Depends(get_db)):
+
+    task = db.query(Task).filter(Task.user_id == current_user.id,Task.id == task_id).first()
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not exist")
+
+    return task
+
+
+
+
+
+
 
     return tasks
 
