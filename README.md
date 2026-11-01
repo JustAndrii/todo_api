@@ -15,6 +15,11 @@ The application allows users to register, authenticate using JWT tokens, and man
 - PostgreSQL database integration
 - Docker support
 - Cloud deployment with Railway
+- Filter tasks by `completed` status
+- Search tasks by title
+- Manage database migrations using Alembic
+- Automated API testing using pytest
+
 
 ## Tech Stack
 
@@ -26,6 +31,8 @@ The application allows users to register, authenticate using JWT tokens, and man
 - JWT Authentication
 - Docker
 - Railway
+- Alembic
+- pytest
 
 
 
@@ -125,7 +132,21 @@ Update `.env` with your own PostgreSQL credentials and JWT secret key.
 
 Make sure PostgreSQL is installed and running, and the database specified in `DATABASE_URL` exists.
 
-### 5. Run the application
+### 5. Apply database migrations
+
+Before starting the application, apply the database migrations to create or update the PostgreSQL schema.
+
+Make sure your database is configured correctly in the `.env` file.
+
+Run:
+
+```bash
+alembic upgrade head
+```
+
+This command applies all pending Alembic migrations.
+
+### 6. Run the application
 
 ```bash
 uvicorn main:app --reload
@@ -134,6 +155,49 @@ uvicorn main:app --reload
 Open the interactive API documentation:
 
 http://127.0.0.1:8000/docs
+
+
+
+## Testing
+
+The project includes automated API tests using pytest.
+
+The test suite covers:
+
+- User registration and authentication
+- Successful and unsuccessful login attempts
+- JWT-protected endpoints
+- Task creation and retrieval
+- Task title validation
+- User-specific access control
+- Health endpoint
+
+### Install development dependencies
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+### Configure the test database
+
+Tests use a separate PostgreSQL database named `todo_api_alembic_test`.
+
+Create this database and apply the Alembic migrations to it before running the tests.
+
+The main database (`todo_db`) and test database must remain separate.
+
+### Run tests
+
+Execute all automated tests:
+
+```bash
+python3 -m pytest -v
+```
+
+The current test suite contains 10 automated tests.
+
+Test database changes are isolated using SQLAlchemy transactions and rolled back after each test.
+
 
 
 ## Docker
