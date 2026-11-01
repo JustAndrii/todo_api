@@ -23,7 +23,7 @@ The application allows users to register, authenticate using JWT tokens, and man
 
 ## Tech Stack
 
-- Python 3.14
+- Python 3.12 (Docker) / 3.14 (local development)
 - FastAPI
 - PostgreSQL
 - SQLAlchemy
@@ -95,6 +95,21 @@ todo_api/
 | POST | /tasks | Create a new task |
 | PATCH | /tasks/{task_id} | Update an existing task |
 | DELETE | /tasks/{task_id} | Delete a task |
+| GET | /tasks/{task_id} | Retrieve a specific task |
+
+### Task Filtering and Search
+
+The `GET /tasks` endpoint supports optional query parameters:
+
+- `completed` — filter tasks by completion status.
+- `search` — search tasks by title.
+
+
+### Health Check
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /health | Check API health |
 
 
 
@@ -180,23 +195,45 @@ pip install -r requirements-dev.txt
 
 ### Configure the test database
 
-Tests use a separate PostgreSQL database named `todo_api_alembic_test`.
+The test suite uses a separate PostgreSQL database named `todo_api_alembic_test`.
 
-Create this database and apply the Alembic migrations to it before running the tests.
+Before running the tests:
 
-The main database (`todo_db`) and test database must remain separate.
+1. Make sure PostgreSQL is running.
+2. Create a database named `todo_api_alembic_test` if it does not already exist.
+3. Apply the Alembic migrations to the test database.
 
-### Run tests
+To apply migrations without modifying the main `.env` file, run the following command from the project root:
 
-Execute all automated tests:
+```python
+import os
+from dotenv import load_dotenv
+from sqlalchemy.engine import make_url
+from alembic.config import Config
+from alembic import command
 
-```bash
-python3 -m pytest -v
+load_dotenv(".env")
+
+url = make_url(os.environ["DATABASE_URL"])
+
+if url.database != "todo_db":
+    raise ValueError("Expected main database: todo_db")
+
+test_url = url.set(database="todo_api_alembic_test")
+
+os.environ["DATABASE_URL"] = test_url.render_as_string(
+    hide_password=False
+)
+
+command.upgrade(Config("alembic.ini"), "head")
 ```
 
-The current test suite contains 10 automated tests.
+Execute the code above as a one-time Python script.
 
-Test database changes are isolated using SQLAlchemy transactions and rolled back after each test.
+**Important:** The main database (`todo_db`) and test database (`todo_api_alembic_test`) must remain separate.
+
+The test fixture uses SQLAlchemy transactions and SAVEPOINTs to isolate changes and roll them back after each test.
+
 
 
 
