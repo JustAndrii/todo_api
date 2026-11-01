@@ -30,29 +30,45 @@ The application allows users to register, authenticate using JWT tokens, and man
 
 
 
+
 ## Project Structure
 
 ```text
-
 todo_api/
+├── alembic/
+│   ├── versions/
+│   │   └── a2e986748e3c_initial_schema.py
+│   ├── README
+│   ├── env.py
+│   └── script.py.mako
 ├── images/
 │   ├── banner.png
 │   └── swagger.png
 ├── routers/
+│   ├── __init__.py
 │   ├── users.py
 │   └── tasks.py
+├── tests/
+│   ├── conftest.py
+│   ├── test_health.py
+│   ├── test_login.py
+│   ├── test_register.py
+│   └── test_tasks.py
+├── .dockerignore
 ├── .env.example
 ├── .gitignore
-├── .dockerignore
+├── alembic.ini
 ├── auth.py
 ├── database.py
+├── Dockerfile
 ├── main.py
 ├── models.py
-├── schemas.py
-├── Dockerfile
+├── requirements-dev.txt
 ├── requirements.txt
+├── schemas.py
 └── README.md
 ```
+
 
 ## API Endpoints
 
