@@ -235,6 +235,17 @@ Execute the code above as a one-time Python script.
 The test fixture uses SQLAlchemy transactions and SAVEPOINTs to isolate changes and roll them back after each test.
 
 
+### Run tests
+
+Run the complete test suite:
+
+```bash
+python3 -m pytest -v
+```
+
+The project currently includes 10 automated tests covering authentication, task management, input validation, and access control.
+
+
 
 
 ## Docker
