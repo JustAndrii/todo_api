@@ -44,3 +44,11 @@ def test_login_wrong_password(client):
     assert response.status_code == 200
     assert login_response.status_code == 401
     assert "access_token" not in login_response.json()
+
+
+def test_get_me_invalid_token(client):
+
+    response = client.get("/me", headers={"Authorization": "Bearer invalid_token"})
+
+    assert response.status_code == 401
+    assert response.headers.get("WWW-Authenticate") == "Bearer"

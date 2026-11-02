@@ -243,7 +243,7 @@ Run the complete test suite:
 python3 -m pytest -v
 ```
 
-The project currently includes 10 automated tests covering authentication, task management, input validation, and access control.
+The project currently includes 11 automated tests covering authentication, task management, input validation, and access control.
 
 
 

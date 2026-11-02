@@ -13,7 +13,10 @@ load_dotenv()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 algorithm="HS256"
+
 SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY or not SECRET_KEY.strip():
+    raise RuntimeError("SECRET_KEY is missing or empty")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -41,10 +44,10 @@ def decode_access_token(token: str):
     try:
         data = jwt.decode(token,SECRET_KEY,algorithms=[algorithm])
     except JWTError:
-        raise HTTPException(status_code=403,detail="Could not validate credentials")
+        raise HTTPException(status_code=401,detail="Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})
 
     if 'user_id' not in data:
-        raise HTTPException(status_code=403,detail="Could not validate credentials")
+        raise HTTPException(status_code=401,detail="Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})
 
     user_id = data["user_id"]
 
