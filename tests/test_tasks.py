@@ -194,3 +194,157 @@ def test_tasks_other_user_access(client):
     )
 
     assert get_other_user_task.status_code == 404
+
+
+def test_tasks_filter_completed(client):
+    register_user1 = client.post(
+        "/register",
+        json={
+            "email": "pytest_user@example.com",
+            "password": "test123456",
+        },
+    )
+
+    assert register_user1.status_code == 200
+
+    login_user1 = client.post(
+        "/login",
+        data={
+            "username": "pytest_user@example.com",
+            "password": "test123456",
+        },
+    )
+
+    assert login_user1.status_code == 200
+
+    token_user1 = login_user1.json()["access_token"]
+
+    headers_user1 = {
+        "Authorization": f"Bearer {token_user1}"
+    }
+
+    create_task1 = client.post(
+        "/tasks",
+        headers=headers_user1,
+        json={"title": "Learn Python", "completed": True},
+    )
+
+    create_task2 = client.post(
+        "/tasks",
+        headers=headers_user1,
+        json={"title": "Learn SQL","completed": False},
+    )
+
+    create_task3 = client.post(
+        "/tasks",
+        headers=headers_user1,
+        json={"title": "Learn FastAPI", "completed": True},
+    )
+
+    assert create_task1.status_code == 201
+    assert create_task2.status_code == 201
+    assert create_task3.status_code == 201
+
+
+    get_tasks = client.get(
+        "/tasks",
+        headers=headers_user1,
+        params={"completed": "true"}
+    )
+
+    assert get_tasks.status_code == 200
+    titles = []
+
+    for task in get_tasks.json():
+        titles.append(task["title"])
+
+    assert len(titles) == 2
+    assert "Learn FastAPI" in titles
+    assert "Learn Python" in titles
+
+    for task in get_tasks.json():
+        assert task["completed"] is True
+
+
+    get_new_task = client.get(
+        "/tasks",
+        headers=headers_user1,
+        params={"completed": "false"}
+    )
+
+    assert get_new_task.status_code == 200
+    assert len(get_new_task.json()) == 1
+
+    for task in get_new_task.json():
+        assert task["completed"] is False
+        assert task["title"] == "Learn SQL"
+
+
+
+
+def test_tasks_search(client):
+
+    register_user1 = client.post(
+        "/register",
+        json={
+            "email": "pytest_user@example.com",
+            "password": "test123456",
+        },
+    )
+
+    assert register_user1.status_code == 200
+
+    login_user1 = client.post(
+        "/login",
+        data={
+            "username": "pytest_user@example.com",
+            "password": "test123456",
+        },
+    )
+
+    assert login_user1.status_code == 200
+
+    token_user1 = login_user1.json()["access_token"]
+
+    headers_user1 = {
+        "Authorization": f"Bearer {token_user1}"
+    }
+
+    create_task1 = client.post(
+        "/tasks",
+        headers=headers_user1,
+        json={"title": "Learn Python"},
+    )
+
+    create_task2 = client.post(
+        "/tasks",
+        headers=headers_user1,
+        json={"title": "Python Backend"},
+    )
+
+    create_task3 = client.post(
+        "/tasks",
+        headers=headers_user1,
+        json={"title": "Learn SQL"},
+    )
+
+    assert create_task1.status_code == 201
+    assert create_task2.status_code == 201
+    assert create_task3.status_code == 201
+
+    get_tasks = client.get(
+        "/tasks",
+        headers=headers_user1,
+        params={"search": "Python"}
+    )
+
+    assert get_tasks.status_code == 200
+    assert len(get_tasks.json()) == 2
+
+    titles = []
+    for task in get_tasks.json():
+        titles.append(task["title"])
+
+    assert "Learn Python" in titles
+    assert "Python Backend" in titles
+    assert "Learn SQL" not in titles
